@@ -1,11 +1,11 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from model.elements.baseElement import BaseElement
+from model.elements.base_element import BaseElement
 
 
 class Input(BaseElement):
 
-    def __init__(self, driver: WebDriver, selector: str, locator: str = By.XPATH):
+    def __init__(self, driver: WebDriver, selector: str, locator: str = By.CSS_SELECTOR):
         super(Input, self).__init__(driver, selector, locator)
 
     @property
