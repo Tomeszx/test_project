@@ -2,7 +2,7 @@ import threading
 
 from behave.model import Scenario
 from behave.runner import Context
-from model.context_data import AdditionalContext
+from model.context_data import AdditionalContext, Pages
 from model.webdriver.chrome_driver import Driver
 from retry import retry
 
@@ -21,9 +21,9 @@ def process_clearing_browser_data(browser: Driver):
         raise TimeoutError('The browser data was not properly cleared')
 
 
-
 def before_all(context: Context):
-    context = AdditionalContext(context)
+    context.driver = Driver()
+    context.pages = Pages(context.driver)
 
 
 def before_scenario(context: AdditionalContext, scenario: Scenario):

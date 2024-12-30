@@ -5,7 +5,7 @@ from model.elements.baseElement import BaseElement
 
 class Input(BaseElement):
 
-    def __init__(self, driver: WebDriver, selector: str, locator: str = By.XPATH):
+    def __init__(self, driver: WebDriver, selector: str, locator: str = By.CSS_SELECTOR):
         super(Input, self).__init__(driver, selector, locator)
 
     @property
