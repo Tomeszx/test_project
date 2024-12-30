@@ -37,6 +37,6 @@ class LoginPage:
         return self.header_title.is_clickable(timeout=2)
 
     def get_error_message(self) -> str:
-        if not self.error_message.is_visible_now():
-            raise ElementNotVisibleError(str(self), self.driver.current_url)
+        if not self.error_message.is_visible(timeout=2):
+            raise ElementNotVisibleError(str(self.error_message), self.driver.current_url)
         return self.error_message.text

@@ -97,6 +97,13 @@ class BaseElement(object):
             return False
         return True
 
+    def is_visible(self, timeout: int = BASIC_TIMEOUT) -> bool:
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located((self.locator, self.selector)))
+        except TimeoutException:
+            return False
+        return True
+
     def is_present_now(self) -> bool:
         try:
             _ = self.element
