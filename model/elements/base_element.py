@@ -62,9 +62,6 @@ class BaseElement(object):
     def click(self) -> None:
         self.element.click()
 
-    def wait_and_click(self, timeout: int = 1) -> None:
-        self.wait_for_clickability(timeout).click()
-
     @staticmethod
     def _check_if_with_statement_is_used() -> None:
         stack = inspect.stack()
@@ -93,50 +90,9 @@ class BaseElement(object):
             self.var_name = original_var_name
             self.selector = original_selector
 
-    @contextmanager
-    def extend_selector(self, selector: str) -> Generator[Self, None, None]:
-        """Extends original selector with some additional selector"""
-        self._check_if_with_statement_is_used()
-        original_selector = self.selector
-        try:
-            self.selector = f'{original_selector}{selector}'
-            yield self
-        finally:
-            self.selector = original_selector
-
-    def mouse_hover(self) -> None:
-        webdriver.ActionChains(self.driver).move_to_element(self.element).perform()
-
-    def scroll_to(self) -> None:
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", self.element)
-
-    def get_attribute(self, name: str) -> str:
-        return self.element.get_attribute(name)
-
     def is_clickable(self, timeout: int = BASIC_TIMEOUT) -> bool:
         try:
             WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable((self.locator, self.selector)))
-        except TimeoutException:
-            return False
-        return True
-
-    def is_visible(self, timeout: int = BASIC_TIMEOUT) -> bool:
-        try:
-            WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located((self.locator, self.selector)))
-        except TimeoutException:
-            return False
-        return True
-
-    def is_not_visible(self, timeout: int = BASIC_TIMEOUT) -> bool:
-        try:
-            WebDriverWait(self.driver, timeout).until(EC.invisibility_of_element_located((self.locator, self.selector)))
-        except TimeoutException:
-            return False
-        return True
-
-    def is_present(self, timeout: int = BASIC_TIMEOUT) -> bool:
-        try:
-            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((self.locator, self.selector)))
         except TimeoutException:
             return False
         return True
@@ -160,28 +116,9 @@ class BaseElement(object):
             raise ElementNotClickableError(str(self), self.driver.current_url, error_msg or "", timeout_info)
         return self.element
 
-    def wait_for_visibility(self, timeout: int = BASIC_TIMEOUT, error_msg: str = None) -> None:
-        if not self.is_visible(timeout):
-            timeout_info = f'Error raised after {timeout=}s.'
-            raise ElementNotVisibleError(str(self), self.driver.current_url, error_msg or "", timeout_info)
-        return None
-
-    def wait_for_invisibility(self, timeout: int = BASIC_TIMEOUT, error_msg: str = None) -> None:
-        if not self.is_not_visible(timeout):
-            timeout_info = f'Error raised after {timeout=}s.'
-            raise ElementVisibleError(str(self), self.driver.current_url, error_msg or "", timeout_info)
-        return None
-
-    def wait_for_presence(self, timeout: int = BASIC_TIMEOUT, error_msg: str = None) -> None:
-        if not self.is_present(timeout):
-            timeout_info = f'Error raised after {timeout=}s.'
-            raise ElementNotFoundError(str(self), self.driver.current_url, error_msg or "", timeout_info)
-        return None
-
     @property
     def text(self) -> str:
         return self.element.text
 
-    def get_text_from_formated_selector(self, *args: str, **kwargs: str) -> str:
-        with self.format(*args, **kwargs) as page_element:
-            return page_element.get_attribute("innerText")
+    def get_attribute(self, name: str) -> str:
+        return self.element.get_attribute(name)

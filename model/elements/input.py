@@ -1,6 +1,6 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from model.elements.baseElement import BaseElement
+from model.elements.base_element import BaseElement
 
 
 class Input(BaseElement):
