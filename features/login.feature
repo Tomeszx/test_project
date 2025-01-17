@@ -14,7 +14,7 @@ Feature: Login to service
 
   Scenario Outline: Login to service with incorrect login only
     """
-    Currently there is a bug, so the test will fail. Someone can check which logins are in database.
+    Currently there is a bug, so the test will fail. Someone can check which username is in database.
     Each time the wrong username will be typed it would say that it's wrong.
     """
     Given the website "https://practicetestautomation.com/practice-test-login/" has been opened
