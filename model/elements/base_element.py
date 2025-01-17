@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from typing import Generator, Iterator
 from typing_extensions import Self, overload
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -26,48 +26,51 @@ class BaseElement(object):
         self.selector = selector
         self.driver = driver
         stack = inspect.stack()
-        self.var_name = stack[2].code_context[0].strip().split()[0].replace('self.', '')
+        self.var_name = stack[2].code_context[0].strip().split()[0]
 
     def __repr__(self) -> str:
-        return f"<{self.var_name.replace('self.', '')}='{self.selector}'>"
+        element = self.var_name.replace("self.", "")
+        return f'<{element=} {self.selector=}>'
 
     def __iter__(self) -> Iterator[WebElement]:
-        return iter(self.get_elements())
+        return iter(self.elements)
 
     @overload
-    def __getitem__(self, index: int) -> WebElement: ...
+    def __getitem__(self, index: int) -> WebElement:
+        ...
 
     @overload
-    def __getitem__(self, index: slice) -> list[WebElement]: ...
+    def __getitem__(self, index: slice) -> list[WebElement]:
+        ...
 
     def __getitem__(self, index: int | slice) -> WebElement | list[WebElement]:
         try:
-            return self.get_elements()[index]
+            return self.elements[index]
         except IndexError:
             raise ElementNotFoundError(str(self), self.driver.current_url, f'Element with {index=} is not exist.')
 
     def __len__(self) -> int:
-        return len(self.get_elements())
+        return len(self.elements)
 
     @property
     def element(self) -> WebElement:
-        return self.driver.find_element(self.locator, self.selector)
+        try:
+            return self.driver.find_element(self.locator, self.selector)
+        except NoSuchElementException:
+            raise ElementNotFoundError(str(self), self.driver.current_url)
 
-    def get_elements(self) -> list[WebElement]:
+    @property
+    def elements(self) -> list[WebElement]:
         return self.driver.find_elements(self.locator, self.selector)
 
     def is_enabled(self) -> bool:
         return self.element.is_enabled()
 
     def click(self) -> None:
-        self.element.click()
-
-    @staticmethod
-    def _check_if_with_statement_is_used() -> None:
-        stack = inspect.stack()
-        calling_code = stack[3].code_context[0].strip()
-        if calling_code is None or not calling_code.startswith("with "):
-            raise Exception('You should use `with` clause to call this method!')
+        try:
+            self.element.click()
+        except ElementClickInterceptedException:
+            raise ElementNotClickableError(str(self), self.driver.current_url)
 
     @contextmanager
     def format(self, *args: str, **kwargs: str) -> Generator[Self, None, None]:
@@ -79,7 +82,6 @@ class BaseElement(object):
 
         :param args: string|[string]
         """
-        self._check_if_with_statement_is_used()
         original_selector = self.selector
         original_var_name = self.var_name
         try:
