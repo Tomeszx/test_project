@@ -22,9 +22,4 @@ class Driver(webdriver.Chrome):
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
         options.page_load_strategy = "eager"
-        options.set_capability(
-            'goog:loggingPrefs', {
-                'performance': 'ALL', 'browser': 'ALL', 'client': 'ALL', 'profiler': 'ALL', 'driver': 'ALL'
-            }
-        )
         return options
